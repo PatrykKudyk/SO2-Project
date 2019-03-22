@@ -2,17 +2,23 @@
 
 class Ball{
     private:
-    int posX;
-    int posY;
-    int color;
+    int currentX;
+    int currentY;
+    int lastX;
+    int lastY;
+    int direction;
 
     public:
-    Ball(int x, int y, int color);
+    Ball(int y, int x, int direction);
     ~Ball();
-    int getPosX();
-    int getPosY();
-    int getColor();
-    void setPosX(int val);
-    void setPosY(int val);
-    void setColor(int val);
+    int getCurrentX();
+    int getCurrentY();
+    int getLastX();
+    int getLastY();
+    int getDirection();
+    void setCurrentX(int val);
+    void setCurrentY(int val);
+    void setLastX(int val);
+    void setLastY(int val);
+    void setDirection(int val);
 };

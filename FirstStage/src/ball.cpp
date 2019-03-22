@@ -1,35 +1,51 @@
 #include "../include/ball.hpp"
 
-Ball::Ball(int x, int y, int color){
-    this->posX = x;
-    this->posY = y;
-    this->color = color;
+Ball::Ball(int y, int x, int direction){
+    this->currentX = x;
+    this->currentY = y;
+    this->direction = direction;
 }
 
 Ball::~Ball(){
 
 }
 
-int Ball::getPosX(){
-    return this->posX;
+int Ball::getCurrentX(){
+    return this->currentX;
 }
 
-int Ball::getPosY(){
-    return this->posY;
+int Ball::getCurrentY(){
+    return this->currentY;
 }
 
-int Ball::getColor(){
-    return this->color;
+int Ball::getLastX(){
+    return this->lastX;
 }
 
-void Ball::setPosX(int val){
-    this->posX = val;
+int Ball::getLastY(){
+    return this->lastY;
 }
 
-void Ball::setPosY(int val){
-    this->posY = val;
+int Ball::getDirection(){
+    return this->direction;
 }
 
-void Ball::setColor(int val){
-    this->color = val;
+void Ball::setCurrentX(int val){
+    this->currentX = val;
+}
+
+void Ball::setCurrentY(int val){
+    this->currentY = val;
+}
+
+void Ball::setLastX(int val){
+    this->lastX = val;
+}
+
+void Ball::setLastY(int val){
+    this->lastY = val;
+}
+
+void Ball::setDirection(int val){
+    this->direction = val;
 }
