@@ -33,6 +33,9 @@ void Window::startWindow(){
         {
             balls.push_back(new Ball( height/2, width/2, rand() % 8));
         }
+        else if(addBall == ' '){
+            getch();
+        }
         setBalls();
         displayBalls();
         addBall = getch();
@@ -50,13 +53,32 @@ void Window::setBalls(){
             wrefresh(window);
             bool wallColide = true;
             do 
-            {
-               if(balls[i]->getCurrentX() == 1 || balls[i]->getCurrentX() == (this->width - 2))
+            {   
+                moveBall(i);
+
+                //sprawdzenie rogów
+               if(balls[i]->getCurrentX() == 0 && balls[i]->getCurrentY() == 0){
+                   //lewy gorny rog
+                    updateDirection(i, 2);
+               }
+               else if(balls[i]->getCurrentX() == 0 && balls[i]->getCurrentY() == (width -1)){
+                    //prawy gorny rog
+                    updateDirection(i, 2);
+               }
+               else if(balls[i]->getCurrentX() == (height -1) && balls[i]->getCurrentY() == (width - 1)){
+                    //prawy dolny rog
+                    updateDirection(i, 2);
+               }
+               else if(balls[i]->getCurrentX() == 0 && balls[i]->getCurrentY() == (width -1)){
+                    //lewy dolny rog
+                    updateDirection(i, 2);
+               }
+               else 
+              if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
                {
                     updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
-                    wallColide = true;
                }
-               else if(balls[i]->getCurrentY() == 1 || balls[i]->getCurrentY() == ( height - 2 ))
+               else if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
                {
                    updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
                }
@@ -64,7 +86,6 @@ void Window::setBalls(){
                {
                   wallColide = false;
                }
-                moveBall(i);
             }while(wallColide);
         }
 }
@@ -77,6 +98,7 @@ void Window::updateDirection(int i, int wall){
         // [6][5][4]
         // wall = 0 - sciana pionowa
         // wall = 1 - sciana pozioma
+        // wall = 2 - róg
 
         case 0:
         if(wall == 0){
@@ -84,6 +106,9 @@ void Window::updateDirection(int i, int wall){
         }
         else if(wall == 1){
             balls[i]->setDirection(6);
+        }
+        else if(wall == 2){
+            balls[i]->setDirection(4);
         }
         break;
 
@@ -98,6 +123,9 @@ void Window::updateDirection(int i, int wall){
         else if(wall == 1){
             balls[i]->setDirection(4);
         }
+        else if(wall == 2){
+            balls[i]->setDirection(6);
+        }
         break;
 
         case 3:
@@ -111,6 +139,9 @@ void Window::updateDirection(int i, int wall){
         else if(wall == 1){
             balls[i]->setDirection(2);
         }
+        else if(wall == 2){
+            balls[i]->setDirection(0);
+        }
         break;
 
         case 5:
@@ -123,6 +154,9 @@ void Window::updateDirection(int i, int wall){
         }
         else if(wall == 1){
             balls[i]->setDirection(0);
+        }
+        else if(wall == 2){
+            balls[i]->setDirection(2);
         }
         break;
 

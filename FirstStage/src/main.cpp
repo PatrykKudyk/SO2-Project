@@ -7,7 +7,7 @@
 int main() {
 
     nodelay(stdscr, NULL);
-    Window window = Window(16,60);
+    Window window = Window(16,30);
     window.startWindow();
 
     return 0;
