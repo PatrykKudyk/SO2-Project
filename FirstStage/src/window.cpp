@@ -1,7 +1,5 @@
 #include "../include/window.hpp"
-#include <unistd.h>
-#include <cstdlib>
-#include <ctime>
+
 
 Window::Window(int height, int width){
     this->height = height;
@@ -26,23 +24,43 @@ Window::~Window(){
 
 void Window::startWindow(){
 
-    //srand(time(NULL));
+    srand(time(NULL));
     for(int i = 0; i < 7; i++){
-        //balls.push_back(new Ball( height/2, width/2, rand() % 8));
-        balls.push_back(new Ball( height/2, width/2, i));
+        balls.push_back(new Ball( height/2, width/2, rand() % 8));
+        //balls.push_back(new Ball( 2, width/2, i));
     }
 
-    do{
-        for(int i = 0; i < 7; i++)
-        {
-            ballsVectLock.lock();
-            setBall(i);
-            displayBall(i);
-            ballsVectLock.unlock();
-            usleep(60000);
-        }
-    }while(true);
+      std::vector<std::thread> threadVect;
+
+    for(int i = 0; i < 7; i++){
+        threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
+        sleep(2);
+    }
+    getch();
     
+    for(auto& t : threadVect){
+        t.join();
+    }
+    
+}
+
+void Window::useBallWithThreads(int threadId){
+    while(true){
+            if(balls[threadId]->getSpeed() < 1000){
+            ballsVectLock.lock();
+            setBall(threadId);
+            displayBall(threadId);
+            ballsVectLock.unlock();
+            std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
+ 
+            }
+            else{
+            ballsVectLock.lock();
+            eraseBall(threadId);
+            ballsVectLock.unlock();
+            std::this_thread::yield();
+            }
+    }
 }
 
 void Window::setBall(int i){
@@ -53,11 +71,13 @@ void Window::setBall(int i){
        if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
        {
             updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
-            
+            balls[i]->setSpeed(balls[i]->getSpeed()*2);
+
        }
        if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
        {
            updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
+           balls[i]->setSpeed(balls[i]->getSpeed()*2);           
        }
        else
        {
@@ -191,4 +211,9 @@ void Window::displayBall(int i){
     balls[i]->setLastX(balls[i]->getCurrentX());     
     balls[i]->setLastY(balls[i]->getCurrentY());    
     
+}
+
+void Window::eraseBall(int i){
+    mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
+    wrefresh(window);
 }

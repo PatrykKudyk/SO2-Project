@@ -4,6 +4,7 @@ Ball::Ball(int y, int x, int direction){
     this->currentX = x;
     this->currentY = y;
     this->direction = direction;
+    this->speed = 10;
 }
 
 Ball::~Ball(){
@@ -30,6 +31,10 @@ int Ball::getDirection(){
     return this->direction;
 }
 
+int Ball::getSpeed(){
+    return this->speed;
+}
+
 void Ball::setCurrentX(int val){
     this->currentX = val;
 }
@@ -48,4 +53,8 @@ void Ball::setLastY(int val){
 
 void Ball::setDirection(int val){
     this->direction = val;
+}
+
+void Ball::setSpeed(int val){
+    this->speed = val;
 }

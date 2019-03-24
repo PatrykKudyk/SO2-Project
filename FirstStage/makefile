@@ -1,11 +1,11 @@
 debugFlags=-Wall -ggdb
 standardFlag=-std=c++17
-libs=-lncurses
+libs=-lncurses -lpthread
 source=src/
 objects=bin/obj/
 program=bin/
 
-main: ball.o window.o main.o
+main: clean ball.o window.o main.o
 	@g++ ${objects}main.o ${objects}ball.o ${objects}window.o -o ${program}happyBalls ${libs} ${standardFlag} ${debugFlags}
 
 main.o: ${source}main.cpp
@@ -17,7 +17,7 @@ window.o: ${source}window.cpp
 ball.o: ${source}ball.cpp
 	@g++ ${source}ball.cpp -c -o ${objects}ball.o ${libs} ${standart_flag} ${debug_flags} 
 
-#clean:
-#	@rm -f ${objects}* bin/hapyBalls
+clean:
+	@rm -f ${objects}* bin/hapyBalls
 
 

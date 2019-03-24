@@ -1,13 +1,10 @@
-#include <iostream>
-#include <thread>
 #include <ncurses.h>
 #include "../include/window.hpp"
-#include <thread>
 
 int main() {
 
     nodelay(stdscr, NULL);
-    Window window = Window(16,30);
+    Window window = Window(24,60);
     window.startWindow();
 
     return 0;
