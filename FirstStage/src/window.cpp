@@ -33,38 +33,39 @@ void Window::startWindow(){
     }
 
     do{
-        setBalls();
-        displayBalls();
-        wrefresh(window);
-        usleep(60000);
+        for(int i = 0; i < 7; i++)
+        {
+            ballsVectLock.lock();
+            setBall(i);
+            displayBall(i);
+            ballsVectLock.unlock();
+            usleep(60000);
+        }
     }while(true);
     
 }
 
-void Window::setBalls(){
+void Window::setBall(int i){
 
-        for(int i = 0; i < balls.size(); i++)     
-        {
-            mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
-            wrefresh(window);
-            bool wallColide = true;
-            do 
-            {  
-               if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
-               {
-                    updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
-               }
-               if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
-               {
-                   updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
-               }
-               else
-               {
-                  wallColide = false;
-               }
-                moveBall(i);
-            }while(wallColide);
-        }
+    bool wallColide = true;
+    do 
+    {  
+       if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
+       {
+            updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
+            
+       }
+       if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
+       {
+           updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
+       }
+       else
+       {
+          wallColide = false;
+       }
+       moveBall(i);
+    }while(wallColide);
+        
 }
 
 void Window::updateDirection(int i, int wall){
@@ -182,12 +183,12 @@ void Window::moveBall(int i){
     }
 }
 
-void Window::displayBalls(){
-    for(int i = 0; i < balls.size(); i++)
-    {
-        mvwprintw(window, balls[i]->getCurrentY(), balls[i]->getCurrentX(), "o");
-        wrefresh(window);
-        balls[i]->setLastX(balls[i]->getCurrentX());     
-        balls[i]->setLastY(balls[i]->getCurrentY());    
-    }
+void Window::displayBall(int i){
+   
+    mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
+    mvwprintw(window, balls[i]->getCurrentY(), balls[i]->getCurrentX(), "o");
+    wrefresh(window);
+    balls[i]->setLastX(balls[i]->getCurrentX());     
+    balls[i]->setLastY(balls[i]->getCurrentY());    
+    
 }

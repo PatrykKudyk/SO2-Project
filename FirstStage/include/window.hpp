@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <vector>
 #include "ball.hpp"
+#include <mutex>
 
 class Window{
     private:
@@ -8,13 +9,14 @@ class Window{
     int width;
     int height;
     std::vector<Ball *> balls;    //vektor kulek
+    std::mutex ballsVectLock;
 
     public:
     Window(int height, int width);
     ~Window();
     void startWindow();
-    void setBalls();
+    void setBall(int i);
     void updateDirection(int i, int wall);
     void moveBall(int i);
-    void displayBalls();
+    void displayBall(int i);
 };
