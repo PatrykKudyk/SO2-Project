@@ -26,17 +26,15 @@ Window::~Window(){
 
 void Window::startWindow(){
 
-    srand(time(NULL));
-    char addBall;
+    //srand(time(NULL));
+    for(int i = 0; i < 7; i++){
+        //balls.push_back(new Ball( height/2, width/2, rand() % 8));
+        balls.push_back(new Ball( height/2, width/2, i));
+    }
+
     do{
-        if(addBall == 'a')
-        {
-            if(balls.size() <= 7)
-                balls.push_back(new Ball( height/2, width/2, rand() % 8));
-        }
         setBalls();
         displayBalls();
-        addBall = getch();
         wrefresh(window);
         usleep(60000);
     }while(true);
