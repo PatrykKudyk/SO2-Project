@@ -17,6 +17,7 @@ class Window{
     int height;
     std::vector<Ball *> balls;    //vektor kulek
     std::mutex ballsVectLock;
+    char symbol;
 
     public:
     Window(int height, int width);

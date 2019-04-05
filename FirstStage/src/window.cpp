@@ -14,7 +14,7 @@ Window::Window(int height, int width){
     refresh(); 
     box(window, 0,0);   //inicjalizuje ramke dookoła okna
     wrefresh(window);
-    getch();
+    symbol = 'p';
 }
 
 Window::~Window(){
@@ -25,18 +25,22 @@ Window::~Window(){
 void Window::startWindow(){
 
     srand(time(NULL));
-    for(int i = 0; i < 7; i++){
-        balls.push_back(new Ball( height/2, width/2, rand() % 8));
-        //balls.push_back(new Ball( 2, width/2, i));
+    for(int i = 0; i < 50; i++){
+        balls.push_back(new Ball( 2, width/2, rand() % 8));
+       // balls.push_back(new Ball( 2, width/2, i));
     }
 
       std::vector<std::thread> threadVect;
 
-    for(int i = 0; i < 7; i++){
+    for(int i = 0; i < balls.size(); i++){
+        symbol = getch();
+        if(symbol == 'q')
+        {
+           break;
+        }
         threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
-        sleep(2);
+        sleep(1);
     }
-    getch();
     
     for(auto& t : threadVect){
         t.join();
@@ -46,6 +50,11 @@ void Window::startWindow(){
 
 void Window::useBallWithThreads(int threadId){
     while(true){
+
+            if(symbol == 'q'){
+                break;
+            }
+
             if(balls[threadId]->getSpeed() < 1000){
             ballsVectLock.lock();
             setBall(threadId);
@@ -58,8 +67,9 @@ void Window::useBallWithThreads(int threadId){
             ballsVectLock.lock();
             eraseBall(threadId);
             ballsVectLock.unlock();
-            std::this_thread::yield();
-            }
+            break;
+            }  
+        
     }
 }
 

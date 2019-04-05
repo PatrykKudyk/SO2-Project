@@ -3,7 +3,6 @@
 
 int main() {
 
-    nodelay(stdscr, NULL);
     Window window = Window(24,60);
     window.startWindow();
 
