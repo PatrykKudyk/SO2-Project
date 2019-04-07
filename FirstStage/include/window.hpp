@@ -16,6 +16,8 @@ class Window{
     int width;
     int height;
     std::vector<Ball *> balls;    //vektor kulek
+    std::vector<bool> threadsOnCheck;
+    std::vector<std::thread> threadVect;
     std::mutex ballsVectLock;
     char symbol;
 
@@ -29,4 +31,5 @@ class Window{
     void moveBall(int i);
     void displayBall(int i);
     void eraseBall(int i);
+    int getRandomDirection();
 };

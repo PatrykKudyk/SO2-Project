@@ -26,30 +26,34 @@ void Window::startWindow(){
 
     srand(time(NULL));
     for(int i = 0; i < 50; i++){
-        balls.push_back(new Ball( 2, width/2, rand() % 8));
+        balls.push_back(new Ball( 2, width/2, getRandomDirection()));
        // balls.push_back(new Ball( 2, width/2, i));
     }
-
-      std::vector<std::thread> threadVect;
-
     for(int i = 0; i < balls.size(); i++){
         symbol = getch();
         if(symbol == 'q')
         {
            break;
         }
+        threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
         sleep(1);
+        for(int j = 0; j < threadsOnCheck.size(); j++){
+            if(!threadsOnCheck[j])
+                if(threadVect[j].joinable())
+                    threadVect[j].join();
+        }
     }
     
     for(auto& t : threadVect){
-        t.join();
+        if(t.joinable())
+            t.join();
     }
     
 }
 
 void Window::useBallWithThreads(int threadId){
-    while(true){
+    while(threadsOnCheck[threadId]){
 
             if(symbol == 'q'){
                 break;
@@ -67,9 +71,8 @@ void Window::useBallWithThreads(int threadId){
             ballsVectLock.lock();
             eraseBall(threadId);
             ballsVectLock.unlock();
-            break;
+            threadsOnCheck[threadId] = false;
             }  
-        
     }
 }
 
@@ -226,4 +229,13 @@ void Window::displayBall(int i){
 void Window::eraseBall(int i){
     mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
     wrefresh(window);
+}
+
+int Window::getRandomDirection(){
+ 
+   int direction;
+   do{
+       direction = rand()% 8;
+   }while(direction == 1);
+   return direction;
 }
