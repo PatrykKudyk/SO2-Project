@@ -25,10 +25,14 @@ Window::~Window(){
 void Window::startWindow(){
 
     srand(time(NULL));
-    for(int i = 0; i < 50; i++){
+    for(int i = 0; i < 200; i++){
         balls.push_back(new Ball( 2, width/2, getRandomDirection()));
        // balls.push_back(new Ball( 2, width/2, i));
     }
+
+    std::vector<std::thread> threadVect;
+
+
     for(int i = 0; i < balls.size(); i++){
         symbol = getch();
         if(symbol == 'q')

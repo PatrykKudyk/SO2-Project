@@ -17,7 +17,6 @@ class Window{
     int height;
     std::vector<Ball *> balls;    //vektor kulek
     std::vector<bool> threadsOnCheck;
-    std::vector<std::thread> threadVect;
     std::mutex ballsVectLock;
     char symbol;
 
