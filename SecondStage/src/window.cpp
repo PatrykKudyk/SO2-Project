@@ -25,7 +25,7 @@ Window::~Window(){
 void Window::startWindow(){
 
     srand(time(NULL));
-    for(int i = 0; i < 5; i++){
+    for(int i = 0; i < 200; i++){
         balls.push_back(new Ball( 2, width/2, getRandomDirection()));
        // balls.push_back(new Ball( 2, width/2, i));
     }
@@ -64,26 +64,27 @@ void Window::useBallWithThreads(int threadId){
             }
 
             if(balls[threadId]->getSpeed() < 1000){
-                ballsVectLock.lock();
-                setBall(threadId);
-                displayBall(threadId);
-                ballsVectLock.unlock();
-                std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
+            ballsVectLock.lock();
+            setBall(threadId);
+            displayBall(threadId);
+            ballsVectLock.unlock();
+            std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
+ 
             }
             else{
-                ballsVectLock.lock();
-                eraseBall(threadId);
-                ballsVectLock.unlock();
-                threadsOnCheck[threadId] = false;
+            ballsVectLock.lock();
+            eraseBall(threadId);
+            ballsVectLock.unlock();
+            threadsOnCheck[threadId] = false;
             }  
     }
 }
 
 void Window::setBall(int i){
 
-//    bool wallColide = true;
-    //do 
-    //{  
+    bool wallColide = true;
+    do 
+    {  
        if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
        {
             updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
@@ -95,12 +96,12 @@ void Window::setBall(int i){
            updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
            balls[i]->setSpeed(balls[i]->getSpeed()*2);           
        }
-       //else
-       //{
-         // wallColide = false;
-     //  }
+       else
+       {
+          wallColide = false;
+       }
        moveBall(i);
-   // }while(wallColide);
+    }while(wallColide);
         
 }
 
@@ -114,55 +115,55 @@ void Window::updateDirection(int i, int wall){
         // wall = 1 - sciana pozioma
 
         case 0:
-         if(wall == 0){
+        if(wall == 0){
             balls[i]->setDirection(2);
-         }
-         else if(wall == 1){
+        }
+        else if(wall == 1){
             balls[i]->setDirection(6);
-         }
+        }
         break;
 
         case 1:
-         balls[i]->setDirection(5);
+        balls[i]->setDirection(5);
         break;
 
         case 2:
-         if(wall == 0){
+        if(wall == 0){
             balls[i]->setDirection(0);
-         }
-         else if(wall == 1){
+        }
+        else if(wall == 1){
             balls[i]->setDirection(4);
-         }
+        }
         break;
 
         case 3:
-         balls[i]->setDirection(7);
+        balls[i]->setDirection(7);
         break;
 
         case 4:
-         if(wall == 0){
+        if(wall == 0){
             balls[i]->setDirection(6);
-         }
-         else if(wall == 1){
+        }
+        else if(wall == 1){
             balls[i]->setDirection(2);
-         }
+        }
         break;
 
         case 5:
-         balls[i]->setDirection(1);
+        balls[i]->setDirection(1);
         break;
 
         case 6:
-         if(wall == 0){
+        if(wall == 0){
             balls[i]->setDirection(4);
-         }
-         else if(wall == 1){
+        }
+        else if(wall == 1){
             balls[i]->setDirection(0);
-         }
+        }
         break;
 
         case 7:
-         balls[i]->setDirection(3);
+        balls[i]->setDirection(3);
         break;
 
         default:
