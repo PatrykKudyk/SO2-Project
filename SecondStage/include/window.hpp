@@ -18,6 +18,7 @@ class Window{
     std::vector<Ball *> balls;    //vektor kulek
     std::vector<bool> threadsOnCheck;
     std::mutex ballsVectLock;
+    std::mutex ballsMoveBetween;
     char symbol;
 
     public:
@@ -30,5 +31,8 @@ class Window{
     void moveBall(int i);
     void displayBall(int i);
     void eraseBall(int i);
+    bool isMovePossible(int i);
+    bool fieldsCheck(int ballId);
+    int moveType(int ballId);
     int getRandomDirection();
 };

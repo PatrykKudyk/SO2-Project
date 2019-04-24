@@ -3,7 +3,7 @@
 
 int main() {
 
-    Window window = Window(18,45);
+    Window window = Window(25,74);
     window.startWindow();
 
     return 0;

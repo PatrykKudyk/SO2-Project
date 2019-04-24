@@ -41,7 +41,7 @@ void Window::startWindow(){
         }
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
-        sleep(1);
+        sleep(2);
         for(int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
@@ -59,50 +59,46 @@ void Window::startWindow(){
 void Window::useBallWithThreads(int threadId){
     while(threadsOnCheck[threadId]){
 
-            if(symbol == 'q'){
-                break;
-            }
+        if(symbol == 'q'){
+            break;
+        }
 
-            if(balls[threadId]->getSpeed() < 1000){
-            ballsVectLock.lock();
-            setBall(threadId);
-            displayBall(threadId);
-            ballsVectLock.unlock();
-            std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
- 
+        if(balls[threadId]->getSpeed() < 1000){
+            
+          //  ballsMoveBetween.lock();
+            if(isMovePossible(threadId)){
+                ballsVectLock.lock();
+                setBall(threadId);
+                displayBall(threadId);
+                ballsVectLock.unlock();
+                std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
             }
-            else{
+           
+          //  ballsMoveBetween.unlock();
+        }
+        else{
             ballsVectLock.lock();
             eraseBall(threadId);
             ballsVectLock.unlock();
             threadsOnCheck[threadId] = false;
-            }  
+        }  
     }
 }
 
 void Window::setBall(int i){
+   
+    if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
+    {
+        updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
+        balls[i]->setSpeed(balls[i]->getSpeed()*2);
+    }
+    if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
+    {
+        updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
+        balls[i]->setSpeed(balls[i]->getSpeed()*2);           
+    }
 
-    bool wallColide = true;
-    do 
-    {  
-       if(balls[i]->getCurrentX() <= 1 || balls[i]->getCurrentX() >= (this->width - 2))
-       {
-            updateDirection(i, 0);  // "0" - symbolizuje sciany pionowe
-            balls[i]->setSpeed(balls[i]->getSpeed()*2);
-
-       }
-       if(balls[i]->getCurrentY() <= 1 || balls[i]->getCurrentY() >= ( height - 2 ))
-       {
-           updateDirection(i, 1);    // "1" - sumbolizuje sciany poziome
-           balls[i]->setSpeed(balls[i]->getSpeed()*2);           
-       }
-       else
-       {
-          wallColide = false;
-       }
-       moveBall(i);
-    }while(wallColide);
-        
+    moveBall(i);     
 }
 
 void Window::updateDirection(int i, int wall){
@@ -233,6 +229,112 @@ void Window::displayBall(int i){
 void Window::eraseBall(int i){
     mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
     wrefresh(window);
+}
+
+bool Window::isMovePossible(int i){
+    if(balls[i]->getCurrentX() == (int)(width/3) || balls[i]->getCurrentX() == (int)(width*2/3)){
+        ballsMoveBetween.lock();
+        if(fieldsCheck(i)){
+            ballsMoveBetween.unlock();
+            return true;
+        }
+        ballsMoveBetween.unlock();
+        return false;
+    }else{
+        return true;
+    } 
+}
+
+bool Window::fieldsCheck(int ballId){
+    int fLeft = 0, fRight = 0, fCenter = 0;
+    ballsVectLock.lock();
+    for(int i = 0; i < balls.size(); i++){
+        if(balls[i]->getCurrentX() <= (int)(width/3))
+            fLeft++;
+        else if(balls[i]->getCurrentX() > (int)(width/3) && balls[i]->getCurrentX() < (int)(width*2/3))
+            fCenter++;
+        else
+            fRight++;
+    } 
+    ballsVectLock.unlock();
+    //1 - z Lewego do środkowego
+    //2 - ze środkowego do prawego
+    //3 - ze środkowego do lewego
+    //4 - z prawego do środkowego
+    switch(moveType(ballId)){
+        case 1:
+            if(fCenter <= (fLeft + 3))
+                return true;
+        break;
+        case 2:
+            if(fRight <= (fCenter + 3))
+                return true;
+        break;
+        case 3:
+            if(fLeft <= (fCenter + 3))
+                return true;
+        break;
+        case 4:
+            if(fCenter  <= (fRight + 3))
+                return true;
+        break;
+        default:
+        break;
+    }
+    return false;
+}
+
+int Window::moveType(int ballId){
+
+    //1 - z Lewego do środkowego
+    //2 - ze środkowego do prawego
+    //3 - ze środkowego do lewego
+    //4 - z prawego do środkowego
+
+                    // [0][1][2]
+                    // [7] o [3]
+                    // [6][5][4]
+    switch(balls[ballId]->getDirection()){
+        case 0:
+            if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 3;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 4;
+        break;
+        case 2:
+           if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 1;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 2;
+        break;
+        case 3:
+             if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 1;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 2;
+        break;
+        case 4:
+             if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 1;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 2;
+        break;
+        case 6:
+           if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 3;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 4;
+        break;
+        case 7:
+           if(balls[ballId]->getCurrentX() == (int)(width/3))
+                return 3;
+            if(balls[ballId]->getCurrentX() == (int)(width*2/3))
+                return 4;
+        break;
+        default:
+        break;
+    }
+    return 0;
 }
 
 int Window::getRandomDirection(){
