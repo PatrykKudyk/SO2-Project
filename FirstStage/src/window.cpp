@@ -8,7 +8,7 @@ Window::Window(int height, int width){
     curs_set(FALSE);    //nie wyswietla kursora
     noecho();       //nie wyswietla inputu
     nodelay(stdscr,TRUE);      //nie czeka na getchar, tylko ogarnia go w tle
-    cbreak();       //pozwala na wyjscie z programu przy pomocyh "Ctlr+C"
+   // cbreak();       //pozwala na wyjscie z programu przy pomocyh "Ctlr+C"
     this->window = newwin(height, width, 0, 0);    //inicjalizuje okno
 
     refresh(); 
