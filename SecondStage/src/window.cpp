@@ -13,7 +13,7 @@ Window::Window(int height, int width){
 
     refresh(); 
     box(window, 0,0);   //inicjalizuje ramke dookoła okna
-    wrefresh(window);
+    wrefresh(window);  
     symbol = 'p';
 }
 
@@ -41,7 +41,7 @@ void Window::startWindow(){
         }
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
-        sleep(2);
+        sleep(1);
         for(int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
@@ -63,16 +63,16 @@ void Window::useBallWithThreads(int threadId){
             break;
         }
 
-        if(balls[threadId]->getSpeed() < 1000){
+            if(balls[threadId]->getSpeed() < 1000){
             
           //  ballsMoveBetween.lock();
-            if(isMovePossible(threadId)){
-                ballsVectLock.lock();
-                setBall(threadId);
-                displayBall(threadId);
-                ballsVectLock.unlock();
-                std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
-            }
+            //    if(isMovePossible(threadId)){
+                    ballsVectLock.lock();
+                    setBall(threadId);
+                    displayBall(threadId);
+                    ballsVectLock.unlock();
+                    std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
+             //   }
            
           //  ballsMoveBetween.unlock();
         }
@@ -263,19 +263,19 @@ bool Window::fieldsCheck(int ballId){
     //4 - z prawego do środkowego
     switch(moveType(ballId)){
         case 1:
-            if(fCenter <= (fLeft + 3))
+            if(fLeft >= (fCenter + 3))
                 return true;
         break;
         case 2:
-            if(fRight <= (fCenter + 3))
+            if(fCenter >= (fRight + 3))
                 return true;
         break;
         case 3:
-            if(fLeft <= (fCenter + 3))
+            if(fCenter >= (fLeft + 3))
                 return true;
         break;
         case 4:
-            if(fCenter  <= (fRight + 3))
+            if(fRight >= (fCenter + 3))
                 return true;
         break;
         default:
