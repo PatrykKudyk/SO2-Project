@@ -15,11 +15,14 @@ class Window{
     WINDOW *window;         //okno
     int width;
     int height;
+    int fLeft;
+    int fRight;
+    int fCenter;
     std::vector<Ball *> balls;    //vektor kulek
     std::vector<bool> threadsOnCheck;
     std::mutex ballsVectLock;
-    std::mutex ballsMoveBetween;
     char symbol;
+    
 
     public:
     Window(int height, int width);
@@ -31,8 +34,6 @@ class Window{
     void moveBall(int i);
     void displayBall(int i);
     void eraseBall(int i);
-    bool isMovePossible(int i);
-    bool fieldsCheck(int ballId);
-    int moveType(int ballId);
     int getRandomDirection();
+    void fieldsCounter();
 };
