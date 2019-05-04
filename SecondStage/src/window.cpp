@@ -27,17 +27,17 @@ void Window::startWindow(){
     srand(time(NULL));
 
     std::vector<std::thread> threadVect;
-    for(int i = 0; i < 6; i++)
-        balls.push_back(new Ball( 2, width/2, 1));
+    for(int i = 0; i < 5; i++)
+        balls.push_back(new Ball( 2, 2, 1));
 
+    balls.push_back(new Ball( 3, width/2, 7));
     balls.push_back(new Ball( 2, width/2, 3));
-    balls.push_back(new Ball( 2, width/2, 7));
+   
 
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < 7; i++){
         //balls.push_back(new Ball( 2, width/2, getRandomDirection()));
         symbol = getch();
-        if(symbol == 'q')
-        {
+        if(symbol == 'q'){
            break;
         }
         threadsOnCheck.push_back(true);
@@ -204,6 +204,9 @@ void Window::displayBall(int i){
    
     mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
     mvwprintw(window, balls[i]->getCurrentY(), balls[i]->getCurrentX(), "o");
+    mvwprintw(window, 0, 1, "L%i-", fLeft);
+    mvwprintw(window, 0, 4, "C%i-", fCenter);
+    mvwprintw(window, 0, 7, "P%i", fRight);
     wrefresh(window);
     balls[i]->setLastX(balls[i]->getCurrentX());     
     balls[i]->setLastY(balls[i]->getCurrentY());    
@@ -211,6 +214,7 @@ void Window::displayBall(int i){
 }
 
 void Window::eraseBall(int i){
+    balls[i]->setCurrentX(0);
     mvwprintw(window, balls[i]->getLastY(), balls[i]->getLastX(), " ");
     wrefresh(window);
 }
@@ -229,20 +233,15 @@ void Window::fieldsCounter(){
     fRight = 0;
     fCenter = 0;
     for(int i = 0; i < balls.size(); i++){
-        if(balls[i]->getCurrentX() < ((width + 1)/3))
-            fLeft++;
-        else if(balls[i]->getCurrentX() >= ((width + 1)/3) && balls[i]->getCurrentX() < ((width*2 + 1)/3))
-            fCenter++;
-        else
-            fRight++;
+        if(balls[i]->getCurrentX() != 0){
+            if(balls[i]->getCurrentX() < ((width + 1)/3))
+                fLeft++;
+            else if(balls[i]->getCurrentX() >= ((width + 1)/3) && balls[i]->getCurrentX() <= ((width*2 + 1)/3))
+                fCenter++;
+            else
+                fRight++;
+        }
     }
-
-/*
-    mvwprintw(window, 0, 1, "L%i", fLeft);
-    mvwprintw(window, 0, 4, "C%i", fCenter);
-    mvwprintw(window, 0, 7, "P%i", fRight);
-    wrefresh(window);
-*/
 }
 
 bool Window::canBallMove(int ballId){
@@ -250,7 +249,7 @@ bool Window::canBallMove(int ballId){
     //2 - środek
     //3 - prawa
     if(isOnTheBorder(ballId)){
-        if(canBallSwitchFields(balls[ballId]->getCurrentX(), ballField(ballId)))        
+        if(canBallSwitchFields(balls[ballId]->getDirection(), ballField(ballId)))        
             return true;
         return false;
     }
