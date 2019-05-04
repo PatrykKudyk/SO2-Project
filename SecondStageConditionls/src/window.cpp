@@ -65,22 +65,22 @@ void Window::useBallWithThreads(int threadId){
             break;
         }
 
-        fieldsCounter();
+        //fieldsCounter();
 
         if(balls[threadId]->getSpeed() < 1000){
     
             //ballsVectLock.lock();
             std::unique_lock<std::mutex> locker(ballsVectLock);
-            if(canBallMove(threadId)){
+            //if(canBallMove(threadId)){
                 setBall(threadId);
                 displayBall(threadId);
-            }
-            else{
+            //}
+            //else{
                 //condition.wait(ballsVectLock); 
-                condition.wait(locker, [&](){ return canBallMove(threadId); }); 
+            //    condition.wait(locker, [&](){ return canBallMove(threadId); }); 
                 //[&](){useBallWithThreads(i);})
                 
-            }
+            //}
             locker.unlock();
             //ballsVectLock.unlock();
             std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
@@ -233,6 +233,7 @@ int Window::getRandomDirection(){
    return direction;
 }
 
+ /*
 void Window::fieldsCounter(){
     fLeft = 0;
     fRight = 0;
@@ -247,13 +248,13 @@ void Window::fieldsCounter(){
     }
 
 
-    /*
-    mvwprintw(window, 0, 1, "L%i", fLeft);
-    mvwprintw(window, 0, 4, "C%i", fCenter);
-    mvwprintw(window, 0, 7, "P%i", fRight);
-    wrefresh(window);
-    */
-}
+   
+    //mvwprintw(window, 0, 1, "L%i", fLeft);
+    //mvwprintw(window, 0, 4, "C%i", fCenter);
+    //mvwprintw(window, 0, 7, "P%i", fRight);
+    //wrefresh(window);
+   
+} 
 
 bool Window::canBallMove(int ballId){
     //1 - lewa
@@ -315,3 +316,4 @@ bool Window::canBallSwitchFields(int direction, int field){
             break;
     }
 }
+*/

@@ -36,9 +36,10 @@ class Window{
     void displayBall(int i);
     void eraseBall(int i);
     int getRandomDirection();
-    void fieldsCounter();
-    bool canBallMove(int ballId);
-    int ballField(int ballId);
-    bool isOnTheBorder(int ballId);
-    bool canBallSwitchFields(int direction, int field);
+    
+   // void fieldsCounter();
+   // bool canBallMove(int ballId);
+   // int ballField(int ballId);
+   // bool isOnTheBorder(int ballId);
+   // bool canBallSwitchFields(int direction, int field);
 };
