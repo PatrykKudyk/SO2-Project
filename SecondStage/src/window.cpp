@@ -27,14 +27,14 @@ void Window::startWindow(){
     srand(time(NULL));
 
     std::vector<std::thread> threadVect;
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < 3; i++)
         balls.push_back(new Ball( 2, 2, 1));
 
     balls.push_back(new Ball( 3, width/2, 7));
     balls.push_back(new Ball( 2, width/2, 3));
    
 
-    for(int i = 0; i < 7; i++){
+    for(int i = 0; i < 5; i++){
         //balls.push_back(new Ball( 2, width/2, getRandomDirection()));
         symbol = getch();
         if(symbol == 'q'){
@@ -273,7 +273,7 @@ int Window::ballField(int ballId){
 
     if(balls[ballId]->getCurrentX() < (width/3))
         return 1;   //lewa
-    else if(balls[ballId]->getCurrentX() > (width/3) && balls[ballId]->getCurrentX() < (width*2/3))
+    else if(balls[ballId]->getCurrentX() >= (width/3) && balls[ballId]->getCurrentX() <= (width*2/3))
         return 2;   //środek
     else
         return 3;   //prawa
@@ -288,36 +288,26 @@ bool Window::isOnTheBorder(int ballId){
 bool Window::canBallSwitchFields(int direction, int field){
     switch(field){
         case 1: //lewy
-            if(direction == 2 || direction == 3 || direction == 4){     //idzie w prawo
-                if((fLeft + 1) >= fCenter)
-                    return true;
-                return false;
-            }
-            else{
-                return false;
-            }
+            if((fLeft + 3) >= fCenter)
+                return true;
+            return false;
             break;
         case 2: //środek
             if(direction == 0 || direction == 6 || direction == 7){     //idzie w lewo
-                if((fCenter + 1) >= fLeft)
+                if((fCenter + 3) >= fLeft)
                     return true;
                 return false;
             }
             else{       //idzie w prawo
-                if((fCenter + 1) >= fRight)
+                if((fCenter + 3) >= fRight)
                     return true;
                 return false;
             }
             break;
         case 3: //prawy
-            if(direction == 0 || direction == 6 || direction == 7){     //idzie w lewo
-                if((fRight + 1) >= fCenter)
-                    return true;
-                return false;
-            }
-            else{
-                return false;
-            }
+            if((fRight + 3) >= fCenter)
+                return true;
+            return false;
             break;
         default:
             return false;
