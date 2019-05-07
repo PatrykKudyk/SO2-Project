@@ -27,15 +27,15 @@ void Window::startWindow(){
     srand(time(NULL));
 
     std::vector<std::thread> threadVect;
-    for(int i = 0; i < 3; i++)
-        balls.push_back(new Ball( 2, 2, 1));
+//    for(int i = 0; i < 3; i++)
+  //      balls.push_back(new Ball( 2, 2, 1));
 
-    balls.push_back(new Ball( 3, width/2, 7));
-    balls.push_back(new Ball( 2, width/2, 3));
+    //balls.push_back(new Ball( 3, width/2, 7));
+    //balls.push_back(new Ball( 2, width/2, 3));
    
 
-    for(int i = 0; i < 5; i++){
-        //balls.push_back(new Ball( 2, width/2, getRandomDirection()));
+    for(int i = 0; i < balls.size() + 1; i++){
+        balls.push_back(new Ball( 2, width/2, getRandomDirection()));
         symbol = getch();
         if(symbol == 'q'){
            break;
