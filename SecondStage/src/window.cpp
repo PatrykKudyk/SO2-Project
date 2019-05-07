@@ -63,12 +63,11 @@ void Window::useBallWithThreads(int threadId){
         if(symbol == 'q'){
             break;
         }
-        ballsVectLock.lock();
-        fieldsCounter();
-        ballsVectLock.unlock();
+    
         if(balls[threadId]->getSpeed() < 1000){
     
             ballsVectLock.lock();
+            fieldsCounter();
             if(canBallMove(threadId)){
                 setBall(threadId);
                 displayBall(threadId);
@@ -234,23 +233,13 @@ void Window::fieldsCounter(){
     fCenter = 0;
     for(int i = 0; i < balls.size(); i++){
         if(balls[i]->getCurrentX() != 0){
-            if(balls[i]->getCurrentX() < ((width)/3))
+            if(balls[i]->getCurrentX() <= ((width)/3))
                 fLeft++;
             else if(balls[i]->getCurrentX() > ((width)/3) && balls[i]->getCurrentX() < ((width*2)/3))
                 fCenter++;
-            else if(balls[i]->getCurrentX() > ((width*2)/3))
+            else if(balls[i]->getCurrentX() >= ((width*2)/3))
                 fRight++;
-           /* else if(balls[i]->getCurrentX() == ((width + 1)/3))
-                if(balls[i]->getLastX() < ((width + 1)/3))
-                    fLeft++;
-                else 
-                    fCenter++;
-            else if(balls[i]->getCurrentX() == ((width*2 + 1)/3))
-                if(balls[i]->getLastX() > ((width*2 + 1)/3))
-                    fRight++;
-                else
-                    fCenter++;
-                    */
+           
         }
     }
 }
@@ -260,7 +249,7 @@ bool Window::canBallMove(int ballId){
     //2 - środek
     //3 - prawa
     if(isOnTheBorder(ballId)){
-        if(canBallSwitchFields(balls[ballId]->getDirection(), ballField(ballId)))        
+        if(canBallSwitchFields(balls[ballId]->getDirection(), ballField(ballId, balls[ballId]->getDirection())))        
             return true;
         return false;
     }
@@ -269,14 +258,20 @@ bool Window::canBallMove(int ballId){
         
 }
 
-int Window::ballField(int ballId){
-
-    if(balls[ballId]->getCurrentX() < (width/3))
-        return 1;   //lewa
-    else if(balls[ballId]->getCurrentX() >= (width/3) && balls[ballId]->getCurrentX() <= (width*2/3))
-        return 2;   //środek
-    else
-        return 3;   //prawa
+int Window::ballField(int ballId, int direction){
+    if(balls[ballId]->getCurrentX() == (width/3)){
+        if(direction == 2 || direction == 3 || direction == 4)
+            return 1;   //lewa
+        else if(direction == 0 || direction == 6 || direction == 7)
+            return 2;   //środek 
+    }       
+    else if(balls[ballId]->getCurrentX() == (width*2/3)){
+        if(direction == 2 || direction == 3 || direction == 4)
+            return 2;   //lewa
+        else if(direction == 0 || direction == 6 || direction == 7)
+            return 3;   //środek
+    }
+    return 4;
 }
 
 bool Window::isOnTheBorder(int ballId){
@@ -288,24 +283,24 @@ bool Window::isOnTheBorder(int ballId){
 bool Window::canBallSwitchFields(int direction, int field){
     switch(field){
         case 1: //lewy
-            if((fLeft + 3) >= fCenter)
+            if((fLeft + 1) > fCenter)
                 return true;
             return false;
             break;
         case 2: //środek
             if(direction == 0 || direction == 6 || direction == 7){     //idzie w lewo
-                if((fCenter + 3) >= fLeft)
+                if((fCenter + 4) > fLeft)
                     return true;
                 return false;
             }
             else{       //idzie w prawo
-                if((fCenter + 3) >= fRight)
+                if((fCenter + 3) > fRight)
                     return true;
                 return false;
             }
             break;
         case 3: //prawy
-            if((fRight + 3) >= fCenter)
+            if((fRight + 3) > fCenter)
                 return true;
             return false;
             break;

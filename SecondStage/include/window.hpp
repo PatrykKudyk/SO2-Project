@@ -37,7 +37,7 @@ class Window{
     int getRandomDirection();
     void fieldsCounter();
     bool canBallMove(int ballId);
-    int ballField(int ballId);
+    int ballField(int ballId, int direction);
     bool isOnTheBorder(int ballId);
     bool canBallSwitchFields(int direction, int field);
 };
