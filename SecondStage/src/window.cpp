@@ -27,8 +27,8 @@ void Window::startWindow(){
     srand(time(NULL));
 
     std::vector<std::thread> threadVect;
-//    for(int i = 0; i < 3; i++)
-  //      balls.push_back(new Ball( 2, 2, 1));
+    //for(int i = 0; i < 3; i++)
+    //    balls.push_back(new Ball( 2, 2, 1));
 
     //balls.push_back(new Ball( 3, width/2, 7));
     //balls.push_back(new Ball( 2, width/2, 3));
@@ -61,18 +61,43 @@ void Window::useBallWithThreads(int threadId){
     while(threadsOnCheck[threadId]){
 
         if(symbol == 'q'){
+            leftToCenter.notify_all();
+            centerToLeft.notify_all();
+            centerToRight.notify_all();
+            rightToCenter.notify_all();
             break;
         }
     
         if(balls[threadId]->getSpeed() < 1000){
     
-            ballsVectLock.lock();
+            std::unique_lock<std::mutex> lock(ballsVectLock);
+            //ballsVectLock.lock();
+            //lock.lock();
             fieldsCounter();
             if(canBallMove(threadId)){
                 setBall(threadId);
                 displayBall(threadId);
             }
-            ballsVectLock.unlock();
+            else{
+                switch(whichCondition(balls[threadId]->getDirection(), balls[threadId]->getCurrentX())){
+                    case 1:
+                        leftToCenter.wait(lock);
+                        break;
+                    case 2:
+                        centerToLeft.wait(lock);
+                        break;
+                    case 3:
+                        centerToRight.wait(lock);
+                        break;
+                    case 4:
+                        rightToCenter.wait(lock);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //ballsVectLock.unlock();
+            lock.unlock();
             std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
         }
         else{
@@ -205,7 +230,7 @@ void Window::displayBall(int i){
     mvwprintw(window, balls[i]->getCurrentY(), balls[i]->getCurrentX(), "o");
     mvwprintw(window, 0, 1, "L%i-", fLeft);
     mvwprintw(window, 0, 4, "C%i-", fCenter);
-    mvwprintw(window, 0, 7, "P%i", fRight);
+    mvwprintw(window, 0, 7, "P%i-", fRight);
     wrefresh(window);
     balls[i]->setLastX(balls[i]->getCurrentX());     
     balls[i]->setLastY(balls[i]->getCurrentY());    
@@ -242,6 +267,7 @@ void Window::fieldsCounter(){
            
         }
     }
+   notifies();
 }
 
 bool Window::canBallMove(int ballId){
@@ -249,7 +275,8 @@ bool Window::canBallMove(int ballId){
     //2 - środek
     //3 - prawa
     if(isOnTheBorder(ballId)){
-        if(canBallSwitchFields(balls[ballId]->getDirection(), ballField(ballId, balls[ballId]->getDirection())))        
+        if(canBallSwitchFields(balls[ballId]->getDirection(), 
+        ballField(ballId, balls[ballId]->getDirection())))        
             return true;
         return false;
     }
@@ -283,24 +310,24 @@ bool Window::isOnTheBorder(int ballId){
 bool Window::canBallSwitchFields(int direction, int field){
     switch(field){
         case 1: //lewy
-            if((fLeft + 1) > fCenter)
+            if((fLeft + 2) > fCenter)
                 return true;
             return false;
             break;
         case 2: //środek
             if(direction == 0 || direction == 6 || direction == 7){     //idzie w lewo
-                if((fCenter + 4) > fLeft)
+                if((fCenter + 2) > fLeft)
                     return true;
                 return false;
             }
             else{       //idzie w prawo
-                if((fCenter + 3) > fRight)
+                if((fCenter + 2) > fRight)
                     return true;
                 return false;
             }
             break;
         case 3: //prawy
-            if((fRight + 3) > fCenter)
+            if((fRight + 2) > fCenter)
                 return true;
             return false;
             break;
@@ -308,4 +335,32 @@ bool Window::canBallSwitchFields(int direction, int field){
             return false;
             break;
     }
+}
+
+int Window::whichCondition(int direction, int x){
+    if(x == (width/3)){
+        if(direction == 2 || direction == 3 || direction == 4)
+            return 1;   //lewa --> środek
+        else if(direction == 0 || direction == 6 || direction == 7)
+            return 2;   //środek --> lewa 
+    }       
+    else if(x == (width*2/3)){
+        if(direction == 2 || direction == 3 || direction == 4)
+            return 3;   //środek --> prawa
+        else if(direction == 0 || direction == 6 || direction == 7)
+            return 4;   //prawa --> środek
+    }
+    return 5;
+}
+
+void Window::notifies(){
+
+    if((fLeft + 2) > fCenter)
+        leftToCenter.notify_one();
+    if((fCenter + 2) > fLeft)
+        centerToLeft.notify_one();
+    if((fCenter + 2) > fRight)
+        centerToRight.notify_one();
+    if((fRight + 2) > fCenter)
+        rightToCenter.notify_one();
 }

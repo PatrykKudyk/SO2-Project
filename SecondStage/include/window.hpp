@@ -7,6 +7,7 @@
 #include <ctime>
 #include <thread>
 #include <chrono>
+#include <condition_variable>
 
 #include "ball.hpp"
 
@@ -21,6 +22,12 @@ class Window{
     std::vector<Ball *> balls;    //vektor kulek
     std::vector<bool> threadsOnCheck;
     std::mutex ballsVectLock;
+    std::condition_variable leftToCenter;
+    std::condition_variable rightToCenter;
+    std::condition_variable centerToLeft;
+    std::condition_variable centerToRight;
+    
+
     char symbol;
     
 
@@ -40,4 +47,6 @@ class Window{
     int ballField(int ballId, int direction);
     bool isOnTheBorder(int ballId);
     bool canBallSwitchFields(int direction, int field);
+    int whichCondition(int direction, int x);
+    void notifies();
 };
