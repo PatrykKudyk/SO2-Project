@@ -38,11 +38,15 @@ void Window::startWindow(){
         balls.push_back(new Ball( 2, width/2, getRandomDirection()));
         symbol = getch();
         if(symbol == 'q'){
+            leftToCenter.notify_all();
+            centerToLeft.notify_all();
+            centerToRight.notify_all();
+            rightToCenter.notify_all();
            break;
         }
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useBallWithThreads(i);}));
-        sleep(1);
+        sleep(2);
         for(int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
@@ -61,18 +65,12 @@ void Window::useBallWithThreads(int threadId){
     while(threadsOnCheck[threadId]){
 
         if(symbol == 'q'){
-            leftToCenter.notify_all();
-            centerToLeft.notify_all();
-            centerToRight.notify_all();
-            rightToCenter.notify_all();
             break;
         }
     
         if(balls[threadId]->getSpeed() < 1000){
     
             std::unique_lock<std::mutex> lock(ballsVectLock);
-            //ballsVectLock.lock();
-            //lock.lock();
             fieldsCounter();
             if(canBallMove(threadId)){
                 setBall(threadId);
@@ -96,7 +94,6 @@ void Window::useBallWithThreads(int threadId){
                         break;
                 }
             }
-            //ballsVectLock.unlock();
             lock.unlock();
             std::this_thread::sleep_for (std::chrono::milliseconds(balls[threadId]->getSpeed()));
         }
