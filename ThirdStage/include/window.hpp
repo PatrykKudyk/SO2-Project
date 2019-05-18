@@ -8,7 +8,7 @@ class Window{
     WINDOW *window;
     int width;
     int height;
-    std::vector<std::vector<Vegetable>> vegetables;
+    std::vector<std::vector<Vegetable>> vegetablesVec;
 
     public:
     Window(int height, int width);
@@ -18,7 +18,7 @@ class Window{
     void drawCustomer(int x);
     void eraseCustomer(int x);
     void drawVegetables(int startingPointX, std::vector<Vegetable> vegetables);
-    void drawRow(int startX, int startY, char * vegetable, int vegeNumber);
-    char * vegetableChar(int vegetable);
+    void drawSomeVegetables(int startX, int startY, char vegetable, int vegeNumber);
+    void drawRow(int startX, int startY, char vegetableChar, int vegeNumber);
     void clearVegetables(int startingPointX);
 };

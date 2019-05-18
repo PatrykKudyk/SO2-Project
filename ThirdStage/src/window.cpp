@@ -22,7 +22,18 @@ Window::~Window(){
 }
 
 void Window::startWindow(){
-    baseDraw();    
+    baseDraw();
+    Vegetable vegetable(0);
+    std::vector<Vegetable> vegeVec;  
+    vegetablesVec.push_back(vegeVec);
+
+    for(int i = 0; i < 60; i++){
+        vegetablesVec[0].push_back(vegetable);
+        clearVegetables(5);
+        drawVegetables(5,vegetablesVec[0]);
+        usleep(200000);
+    }
+
     for(int j = 0; j < 3; j++){
         for(int i = 3; i < 145; i++){
             drawCustomer(i);
@@ -30,6 +41,7 @@ void Window::startWindow(){
             if(i == 40)
                 sleep(2);
             eraseCustomer(i);
+
         }
     }
 }
@@ -59,7 +71,7 @@ void Window::baseDraw(){
     mvwprintw(window, 11, 39, "/");
     mvwprintw(window, 11, 41, "\\");
     mvwprintw(window, 12, 40, "A");
-    
+
     wrefresh(window);
 
    // for(int i = 40; i < 145; i = i + 4)
@@ -85,82 +97,81 @@ void Window::eraseCustomer(int x){
 }
 
 void Window::drawVegetables(int startingPointX, std::vector<Vegetable> vegetables){
-    switch(vegetables.size()){
-        case 0:
-            break;
-        case 1:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 1);
-            break;
-        case 2:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 2);
-            break;
-        case 3:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 3);
-            break;
-        case 4:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 4);
-            break;
-        case 5:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 5);
-            break;
-        case 6:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 6);
-            break;
-        case 7:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 7);
-            break;
-        case 8:
-            drawRow(startingPointX, 7, vegetableChar(vegetables[0].getVegetableType()), 8);
-            break;
-            
+    if(vegetables.size() > 0){
+        switch(vegetables[0].getVegetableType()){
+            case 0:
+                drawSomeVegetables(startingPointX, 7, 'Q', vegetables.size());
+                break;
+            case 1:
+                drawSomeVegetables(startingPointX, 7, 'L', vegetables.size());
+                break;
+            case 2:
+                drawSomeVegetables(startingPointX, 7, 'P', vegetables.size());
+                break;
+            case 3:
+                drawSomeVegetables(startingPointX, 7, 'U', vegetables.size());
+                break;
+            case 4:
+                drawSomeVegetables(startingPointX, 7, 'K', vegetables.size());
+                break;
+            case 5:
+                drawSomeVegetables(startingPointX, 7, 'C', vegetables.size());
+                break;
+            case 6:
+                drawSomeVegetables(startingPointX, 7, 'D', vegetables.size());
+                break;
+            case 7:
+                drawSomeVegetables(startingPointX, 7, 'G', vegetables.size());
+                break;
+            case 8:
+                drawSomeVegetables(startingPointX, 7, 'J', vegetables.size());
+                break;
+            case 9:
+                drawSomeVegetables(startingPointX, 7, 'V', vegetables.size());
+                break;        
+            default:
+                break;
+        }
     }
 }
 
-void Window::drawRow(int startX, int startY, char * vegetable, int vegeNumber){
-    for(int i = startX; i < vegeNumber; i++)
+void Window::drawSomeVegetables(int startX, int startY, char vegetable, int vegeNumber){
+    if(vegeNumber <= 12)
+        drawRow(startX, startY, vegetable, vegeNumber);
+    else if(vegeNumber > 12 && vegeNumber <= 24){
+        int lastRow = vegeNumber - 12;
+        drawRow(startX, startY, vegetable, 12);
+        drawRow(startX, startY - 1, vegetable, lastRow);
+    } else if(vegeNumber > 24 && vegeNumber <= 36){
+        int lastRow = vegeNumber - 24;
+        drawRow(startX, startY, vegetable, 12);
+        drawRow(startX, startY - 1, vegetable, 12);
+        drawRow(startX, startY - 2, vegetable, lastRow);
+    } else if(vegeNumber > 36 && vegeNumber <= 48){
+        int lastRow = vegeNumber - 36;
+        drawRow(startX, startY, vegetable, 12);
+        drawRow(startX, startY - 1, vegetable, 12);
+        drawRow(startX, startY - 2, vegetable, 12);
+        drawRow(startX, startY - 3, vegetable, lastRow);        
+    } else if(vegeNumber > 48 && vegeNumber <= 60){
+        int lastRow = vegeNumber - 48;
+        drawRow(startX, startY, vegetable, 12);
+        drawRow(startX, startY - 1, vegetable, 12);
+        drawRow(startX, startY - 2, vegetable, 12);
+        drawRow(startX, startY - 3, vegetable, 12);
+        drawRow(startX, startY - 4, vegetable, lastRow);        
+    }
+    wrefresh(window);
+}
+
+void Window::drawRow(int startX, int startY, char vegetableChar, int vegeNumber){
+    const char * vegetable = &vegetableChar;
+    for(int i = startX; i < vegeNumber + startX; i++)
         mvwprintw(window, startY, i, vegetable);
 }
 
-char * Window::vegetableChar(int vegetable){
-    switch(vegetable){
-        case 0:
-            return "C";
-            break;
-        case 1:
-            return "X";
-            break;
-        case 2:
-            return "S";
-            break;
-        case 3:
-            return "Z";
-            break;
-        case 4:
-            return "B";
-            break;
-        case 5:
-            return "E";
-            break;
-        case 6:
-            return "P";
-            break;
-        case 7:
-            return "T";
-            break;
-        case 8:
-            return "O";
-            break;
-        case 9:
-            return "I";
-            break;
-        default:
-            return "W";
-            break;
-    }
-}
-
 void Window::clearVegetables(int startingPointX){
-    for(int i = startingPointX + 1; i < startingPointX + 12; i ++){
+    for(int i = startingPointX; i < startingPointX + 12; i++){
         for(int j = 7; j > 3; j--){
             mvwprintw(window, j, i, " ");
         }
