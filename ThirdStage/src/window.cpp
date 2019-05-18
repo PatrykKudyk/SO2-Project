@@ -4,6 +4,7 @@
 Window::Window(int height, int width){
     this->height = height;
     this->width = width;
+    createVegetableVectors();
     initscr();      //inicjuje ncurses
     curs_set(FALSE);    //nie wyswietla kursora
     noecho();       //nie wyswietla inputu
@@ -21,19 +22,22 @@ Window::~Window(){
     endwin();       //kończę korzystanie z ncurses
 }
 
+void Window::createVegetableVectors(){
+    std::vector<Vegetable> vegeVec; 
+    for(int i = 0; i < 10; i++)
+        vegetablesVec.push_back(vegeVec);
+    Vegetable vegetable(0);
+    for(int i = 0; i < 10; i++){
+        vegetable.setVegetableType(i);
+        for(int j = 0; j < 55; j++){
+            vegetablesVec[i].push_back(vegetable);
+        }
+    }
+}
+
 void Window::startWindow(){
     baseDraw();
-    Vegetable vegetable(0);
-    std::vector<Vegetable> vegeVec;  
-    vegetablesVec.push_back(vegeVec);
-
-    for(int i = 0; i < 60; i++){
-        vegetablesVec[0].push_back(vegetable);
-        clearVegetables(5);
-        drawVegetables(5,vegetablesVec[0]);
-        usleep(200000);
-    }
-
+    drawShelfs();
     for(int j = 0; j < 3; j++){
         for(int i = 3; i < 145; i++){
             drawCustomer(i);
@@ -96,6 +100,13 @@ void Window::eraseCustomer(int x){
     wrefresh(window);
 }
 
+void Window::drawShelfs(){
+    for(int i = 0, j = 5; i < 10; i++, j = j + 14){
+        clearVegetables(j);
+        drawVegetables(j,vegetablesVec[i]);
+    }
+}
+
 void Window::drawVegetables(int startingPointX, std::vector<Vegetable> vegetables){
     if(vegetables.size() > 0){
         switch(vegetables[0].getVegetableType()){
@@ -136,43 +147,43 @@ void Window::drawVegetables(int startingPointX, std::vector<Vegetable> vegetable
 }
 
 void Window::drawSomeVegetables(int startX, int startY, char vegetable, int vegeNumber){
-    if(vegeNumber <= 12)
+    if(vegeNumber <= 11)
         drawRow(startX, startY, vegetable, vegeNumber);
-    else if(vegeNumber > 12 && vegeNumber <= 24){
-        int lastRow = vegeNumber - 12;
-        drawRow(startX, startY, vegetable, 12);
+    else if(vegeNumber > 11 && vegeNumber <= 22){
+        int lastRow = vegeNumber - 11;
+        drawRow(startX, startY, vegetable, 11);
         drawRow(startX, startY - 1, vegetable, lastRow);
-    } else if(vegeNumber > 24 && vegeNumber <= 36){
-        int lastRow = vegeNumber - 24;
-        drawRow(startX, startY, vegetable, 12);
-        drawRow(startX, startY - 1, vegetable, 12);
+    } else if(vegeNumber > 22 && vegeNumber <= 33){
+        int lastRow = vegeNumber - 22;
+        drawRow(startX, startY, vegetable, 11);
+        drawRow(startX, startY - 1, vegetable, 11);
         drawRow(startX, startY - 2, vegetable, lastRow);
-    } else if(vegeNumber > 36 && vegeNumber <= 48){
-        int lastRow = vegeNumber - 36;
-        drawRow(startX, startY, vegetable, 12);
-        drawRow(startX, startY - 1, vegetable, 12);
-        drawRow(startX, startY - 2, vegetable, 12);
+    } else if(vegeNumber > 33 && vegeNumber <= 44){
+        int lastRow = vegeNumber - 33;
+        drawRow(startX, startY, vegetable, 11);
+        drawRow(startX, startY - 1, vegetable, 11);
+        drawRow(startX, startY - 2, vegetable, 11);
         drawRow(startX, startY - 3, vegetable, lastRow);        
-    } else if(vegeNumber > 48 && vegeNumber <= 60){
-        int lastRow = vegeNumber - 48;
-        drawRow(startX, startY, vegetable, 12);
-        drawRow(startX, startY - 1, vegetable, 12);
-        drawRow(startX, startY - 2, vegetable, 12);
-        drawRow(startX, startY - 3, vegetable, 12);
+    } else if(vegeNumber > 44 && vegeNumber <= 55){
+        int lastRow = vegeNumber - 44;
+        drawRow(startX, startY, vegetable, 11);
+        drawRow(startX, startY - 1, vegetable, 11);
+        drawRow(startX, startY - 2, vegetable, 11);
+        drawRow(startX, startY - 3, vegetable, 11);
         drawRow(startX, startY - 4, vegetable, lastRow);        
     }
     wrefresh(window);
 }
 
 void Window::drawRow(int startX, int startY, char vegetableChar, int vegeNumber){
-    const char * vegetable = &vegetableChar;
+    const char * vegetable = new char(vegetableChar);
     for(int i = startX; i < vegeNumber + startX; i++)
         mvwprintw(window, startY, i, vegetable);
 }
 
 void Window::clearVegetables(int startingPointX){
     for(int i = startingPointX; i < startingPointX + 12; i++){
-        for(int j = 7; j > 3; j--){
+        for(int j = 7; j >= 3; j--){
             mvwprintw(window, j, i, " ");
         }
     }
