@@ -54,6 +54,8 @@ void Window::startWindow(){
         }
         symbol = getch();
         i++;
+        mvwprintw(window,11,144,"%i ", i%15);
+        wrefresh(window);
         if((i%15) == 0){
             supplyDelivery();
             drawShelfs();
@@ -220,12 +222,12 @@ void Window::clearVegetables(int startingPointX){
 
 void Window::deliveryThread(){
     do{
-        sleep(40);
+        sleep(10);
         for(int i = 3; i < 145; i++){
             if(i == 40){
                 usleep(1000000);
                 supplyDelivery();
-                drawShelfs();
+                //drawShelfs();
             }
             eraseDelivery(i - 1);
             drawDelivery(i);
@@ -263,7 +265,7 @@ void Window::supplyDelivery(){
     vegetableMutex.lock();
     for(int i = 0; i < 10; i++){
         for(int j = 0; j < 20; j++){
-            if(vegetablesVec[i].size() < 60){
+            if(vegetablesVec[i].size() < 55){
                 Vegetable vegetable(i);
                 vegetablesVec[i].push_back(vegetable);
             }
