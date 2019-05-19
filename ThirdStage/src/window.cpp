@@ -4,6 +4,7 @@
 Window::Window(int height, int width){
     this->height = height;
     this->width = width;
+    this->symbol = 'o';
     createVegetableVectors();
     initscr();      //inicjuje ncurses
     curs_set(FALSE);    //nie wyswietla kursora
@@ -38,15 +39,27 @@ void Window::createVegetableVectors(){
 void Window::startWindow(){
     baseDraw();
     drawShelfs();
-    for(int j = 0; j < 3; j++){
-        for(int i = 3; i < 145; i++){
-            drawCustomer(i);
-            usleep(100000);
-            if(i == 40)
-                sleep(2);
-            eraseCustomer(i);
-
+    std::vector<std::thread> threadVect;
+    int i = 0;
+    do{
+        Customer customer;
+        customersVect.push_back(customer);
+        threadsOnCheck.push_back(true);
+        threadVect.push_back(std::thread([&](){useCustomerWithThreads(i);}));
+        sleep(2);
+        for(int j = 0; j < threadsOnCheck.size(); j++){
+            if(!threadsOnCheck[j])
+                if(threadVect[j].joinable())
+                    threadVect[j].join();
         }
+        symbol = getch();
+        i++;
+    }while(symbol != 'q');
+
+
+    for(auto& t : threadVect){
+        if(t.joinable())
+            t.join();
     }
 }
 
@@ -188,4 +201,20 @@ void Window::clearVegetables(int startingPointX){
         }
     }
     wrefresh(window);
+}
+
+void Window::useCustomerWithThreads(int threadId){
+    while(threadsOnCheck[threadId]){
+
+        if(symbol == 'q'){
+            break;
+        }
+    
+        if(customersVect[threadId]->getPositionX() >= 3){
+    
+        }
+        else{
+            threadsOnCheck[threadId] = false;
+        }  
+    }
 }
