@@ -40,23 +40,28 @@ void Window::startWindow(){
     baseDraw();
     drawShelfs();
     std::vector<std::thread> threadVect;
+    //std::thread delivery([&](){deliveryThread();});
     int i = 0;
     do{
-        Customer customer;
-        customersVect.push_back(customer);
+        customersVect.push_back(new Customer(144));
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useCustomerWithThreads(i);}));
-        sleep(2);
-        for(int j = 0; j < threadsOnCheck.size(); j++){
+        sleep(1);
+        for(long unsigned int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
                     threadVect[j].join();
         }
         symbol = getch();
         i++;
+        if((i%15) == 0){
+            supplyDelivery();
+            drawShelfs();
+        }
+
     }while(symbol != 'q');
 
-
+    //delivery.join();
     for(auto& t : threadVect){
         if(t.joinable())
             t.join();
@@ -64,6 +69,7 @@ void Window::startWindow(){
 }
 
 void Window::baseDraw(){
+    drawMutex.lock();
     //pionowe ściany półek
     for(int j = 3; j < 144; j = j + 14){
         for(int i = 3; i < 8; i++)
@@ -89,35 +95,44 @@ void Window::baseDraw(){
     mvwprintw(window, 11, 41, "\\");
     mvwprintw(window, 12, 40, "A");
 
+    drawMutex.unlock();
     wrefresh(window);
 
    // for(int i = 40; i < 145; i = i + 4)
    //     drawCustomer(i);
 }
 
-void Window::drawCustomer(int x){
+void Window::drawCustomer(int customerId){
+    int x = customersVect[customerId]->getPositionX();
+    drawMutex.lock();
     mvwprintw(window, 16, x, "O");
     mvwprintw(window, 17, x, "|");
     mvwprintw(window, 17, x - 1, "/");
     mvwprintw(window, 17, x + 1, "\\");
     mvwprintw(window, 18, x, "A");
+    drawMutex.unlock();
     wrefresh(window);
 }
 
-void Window::eraseCustomer(int x){
+void Window::eraseCustomer(int customerId){
+    int x = customersVect[customerId]->getPositionX();
+    drawMutex.lock();
     mvwprintw(window, 16, x, " ");
     mvwprintw(window, 17, x, " ");
     mvwprintw(window, 17, x - 1, " ");
     mvwprintw(window, 17, x + 1, " ");
     mvwprintw(window, 18, x, " ");
+    drawMutex.unlock();
     wrefresh(window);
 }
 
 void Window::drawShelfs(){
+    drawMutex.lock();
     for(int i = 0, j = 5; i < 10; i++, j = j + 14){
         clearVegetables(j);
         drawVegetables(j,vegetablesVec[i]);
     }
+    drawMutex.unlock();
 }
 
 void Window::drawVegetables(int startingPointX, std::vector<Vegetable> vegetables){
@@ -203,18 +218,163 @@ void Window::clearVegetables(int startingPointX){
     wrefresh(window);
 }
 
+void Window::deliveryThread(){
+    do{
+        sleep(40);
+        for(int i = 3; i < 145; i++){
+            if(i == 40){
+                usleep(1000000);
+                supplyDelivery();
+                drawShelfs();
+            }
+            eraseDelivery(i - 1);
+            drawDelivery(i);
+            usleep(100000);
+            if(symbol == 'q')
+                break;
+        }
+
+    }while(symbol != 'q');
+}
+
+void Window::drawDelivery(int x){
+    drawMutex.lock();
+    mvwprintw(window, 2, x, "-");
+    mvwprintw(window, 2, x - 1, "-");
+    mvwprintw(window, 2, x + 1, "-");
+    mvwprintw(window, 2, x - 2, "o");
+    mvwprintw(window, 2, x + 2, "o");
+    drawMutex.unlock();
+    wrefresh(window);
+}
+
+void Window::eraseDelivery(int x){
+    drawMutex.lock();
+    mvwprintw(window, 2, x, " ");
+    mvwprintw(window, 2, x - 1, " ");
+    mvwprintw(window, 2, x + 1, " ");
+    mvwprintw(window, 2, x - 2, " ");
+    mvwprintw(window, 2, x + 2, " ");
+    drawMutex.unlock();
+    wrefresh(window);
+}
+
+void Window::supplyDelivery(){
+    vegetableMutex.lock();
+    for(int i = 0; i < 10; i++){
+        for(int j = 0; j < 20; j++){
+            if(vegetablesVec[i].size() < 60){
+                Vegetable vegetable(i);
+                vegetablesVec[i].push_back(vegetable);
+            }
+        }
+    }
+    vegetableMutex.unlock();
+}
+
 void Window::useCustomerWithThreads(int threadId){
     while(threadsOnCheck[threadId]){
-
+        
         if(symbol == 'q'){
             break;
         }
-    
+
         if(customersVect[threadId]->getPositionX() >= 3){
-    
+            customerVectMutex.lock();
+            eraseCustomer(threadId);
+            customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
+            drawCustomer(threadId);
+            customerVectMutex.unlock();
+            if(customersVect[threadId]->getPositionX() == 40){
+                if(canDoShopping(threadId)){
+                    customerVectMutex.lock();
+                    doShopping(threadId);
+                    customerVectMutex.unlock();
+                    drawShelfs();
+                    baseDraw();
+                    std::this_thread::sleep_for (std::chrono::milliseconds(400));
+                }
+            }
+            std::this_thread::sleep_for (std::chrono::milliseconds(100));
         }
         else{
+            customerVectMutex.lock();
+            eraseCustomer(threadId);
+            customersVect[threadId]->setPositionX(0);
+            customerVectMutex.unlock();
             threadsOnCheck[threadId] = false;
         }  
     }
+}
+
+bool Window::canDoShopping(int customerId){
+    vegetableMutex.lock();
+    if(vegetablesVec[0].size() < customersVect[customerId]->getShoppingList().getVege0()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[1].size() < customersVect[customerId]->getShoppingList().getVege1()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[2].size() < customersVect[customerId]->getShoppingList().getVege2()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[3].size() < customersVect[customerId]->getShoppingList().getVege3()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[4].size() < customersVect[customerId]->getShoppingList().getVege4()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[5].size() < customersVect[customerId]->getShoppingList().getVege5()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[6].size() < customersVect[customerId]->getShoppingList().getVege6()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[7].size() < customersVect[customerId]->getShoppingList().getVege7()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[8].size() < customersVect[customerId]->getShoppingList().getVege8()){
+        vegetableMutex.unlock();
+        return false;
+    }
+    if(vegetablesVec[9].size() < customersVect[customerId]->getShoppingList().getVege9()){
+        vegetableMutex.unlock();
+        return false;
+    }
+
+    vegetableMutex.unlock();
+    return true;
+}
+
+void Window::doShopping(int customerId){
+    vegetableMutex.lock();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege0(); i++)
+        vegetablesVec[0].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege1(); i++)
+        vegetablesVec[1].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege2(); i++)
+        vegetablesVec[2].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege3(); i++)
+        vegetablesVec[3].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege4(); i++)
+        vegetablesVec[4].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege5(); i++)
+        vegetablesVec[5].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege6(); i++)
+        vegetablesVec[6].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege7(); i++)
+        vegetablesVec[7].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege8(); i++)
+        vegetablesVec[8].pop_back();
+    for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege9(); i++)
+        vegetablesVec[9].pop_back();
+    vegetableMutex.unlock();
 }

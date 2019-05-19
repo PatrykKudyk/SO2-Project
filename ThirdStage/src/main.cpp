@@ -10,8 +10,5 @@ int main() {
 
     window.startWindow();
 
-    std::cin.get();
-    std::cin.get();
-
     return 0;
 }

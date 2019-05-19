@@ -19,6 +19,9 @@ class Window{
     std::vector<std::vector<Vegetable>> vegetablesVec;
     std::vector<bool> threadsOnCheck;
     std::vector<Customer *> customersVect;
+    std::mutex customerVectMutex;
+    std::mutex drawMutex;
+    std::mutex vegetableMutex;
 
     public:
     Window(int height, int width);
@@ -26,12 +29,18 @@ class Window{
     void createVegetableVectors();
     void startWindow();
     void baseDraw();
-    void drawCustomer(int x);
-    void eraseCustomer(int x);
+    void drawCustomer(int customerId);
+    void eraseCustomer(int customerId);
     void drawShelfs();
     void drawVegetables(int startingPointX, std::vector<Vegetable> vegetables);
     void drawSomeVegetables(int startX, int startY, char vegetable, int vegeNumber);
     void drawRow(int startX, int startY, char vegetableChar, int vegeNumber);
     void clearVegetables(int startingPointX);
+    void deliveryThread();
+    void drawDelivery(int x);
+    void eraseDelivery(int x);
+    void supplyDelivery();
     void useCustomerWithThreads(int threadId);
+    bool canDoShopping(int customerId);
+    void doShopping(int customerId);
 };

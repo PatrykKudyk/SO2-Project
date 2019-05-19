@@ -1,7 +1,7 @@
 #include "../include/customer.hpp"
 
-Customer::Customer(){
-    
+Customer::Customer(int x){
+    positionX = x;
 }
 
 Customer::~Customer(){

@@ -7,7 +7,7 @@ class Customer{
     int positionX;
     
     public:
-    Customer();
+    Customer(int x);
     ~Customer();
     ShoppingList getShoppingList();
     int getPositionX();
