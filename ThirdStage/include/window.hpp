@@ -43,4 +43,5 @@ class Window{
     void useCustomerWithThreads(int threadId);
     bool canDoShopping(int customerId);
     void doShopping(int customerId);
+    bool canCustomerMove(int customerId);
 };

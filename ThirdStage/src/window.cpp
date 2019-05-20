@@ -282,11 +282,6 @@ void Window::useCustomerWithThreads(int threadId){
         }
 
         if(customersVect[threadId]->getPositionX() >= 3){
-            customerVectMutex.lock();
-            eraseCustomer(threadId);
-            customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
-            drawCustomer(threadId);
-            customerVectMutex.unlock();
             if(customersVect[threadId]->getPositionX() == 40){
                 if(canDoShopping(threadId)){
                     customerVectMutex.lock();
@@ -294,18 +289,34 @@ void Window::useCustomerWithThreads(int threadId){
                     customerVectMutex.unlock();
                     drawShelfs();
                     baseDraw();
-                    std::this_thread::sleep_for (std::chrono::milliseconds(400));
+                    std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getShoppingTime()));
+                    customerVectMutex.lock();
+                    eraseCustomer(threadId);
+                    customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
+                    drawCustomer(threadId);
+                    customerVectMutex.unlock();
+                }
+            }else{
+                if(canCustomerMove(threadId)){
+                    customerVectMutex.lock();
+                    eraseCustomer(threadId);
+                    customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
+                    drawCustomer(threadId);
+                    customerVectMutex.unlock();
+                }
+                else{
+                    std::this_thread::sleep_for (std::chrono::milliseconds(100));
                 }
             }
-            std::this_thread::sleep_for (std::chrono::milliseconds(100));
-        }
-        else{
+            std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getWalkSpeed()));
+                
+            }else{
             customerVectMutex.lock();
             eraseCustomer(threadId);
             customersVect[threadId]->setPositionX(0);
             customerVectMutex.unlock();
             threadsOnCheck[threadId] = false;
-        }  
+            }  
     }
 }
 
@@ -379,4 +390,20 @@ void Window::doShopping(int customerId){
     for(int i = 0; i < customersVect[customerId]->getShoppingList().getVege9(); i++)
         vegetablesVec[9].pop_back();
     vegetableMutex.unlock();
+}
+
+bool Window::canCustomerMove(int customerId){
+    if(customerId > 0){
+        if(!(customersVect[customerId - 1]->getPositionX() <= 3)){
+            if(customersVect[customerId]->getPositionX() >= customersVect[customerId - 1]->getPositionX() + 4){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
+    }else{
+        return true;
+    }
 }
