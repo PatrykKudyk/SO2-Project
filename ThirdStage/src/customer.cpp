@@ -2,7 +2,7 @@
 
 Customer::Customer(int x){
     srand(time(NULL));
-    shoppingTime = rand()%400 + 400;
+    shoppingTime = rand()%400 + 2400;
     walkSpeed = rand()%100 + 100;
     positionX = x;
 

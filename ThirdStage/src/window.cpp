@@ -46,7 +46,7 @@ void Window::startWindow(){
         customersVect.push_back(new Customer(144));
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useCustomerWithThreads(i);}));
-        sleep(1);
+        sleep(4);
         for(long unsigned int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
@@ -54,9 +54,9 @@ void Window::startWindow(){
         }
         symbol = getch();
         i++;
-        mvwprintw(window,11,144,"%i ", i%15);
+        mvwprintw(window,11,144,"%i ", (i % 15) + 1);
         wrefresh(window);
-        if((i%15) == 0){
+        if((i % 15) == 0){
             supplyDelivery();
             drawShelfs();
         }
@@ -280,43 +280,50 @@ void Window::useCustomerWithThreads(int threadId){
         if(symbol == 'q'){
             break;
         }
-
+        //std::unique_lock<std::mutex> lock(customerVectMutex);
         if(customersVect[threadId]->getPositionX() >= 3){
             if(customersVect[threadId]->getPositionX() == 40){
                 if(canDoShopping(threadId)){
                     customerVectMutex.lock();
                     doShopping(threadId);
-                    customerVectMutex.unlock();
+                    //lock.unlock();
                     drawShelfs();
                     baseDraw();
+                    customerVectMutex.unlock();
                     std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getShoppingTime()));
                     customerVectMutex.lock();
+                    //lock.lock();
                     eraseCustomer(threadId);
                     customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
                     drawCustomer(threadId);
+                    //lock.unlock();
                     customerVectMutex.unlock();
                 }
             }else{
                 if(canCustomerMove(threadId)){
                     customerVectMutex.lock();
+                    //lock.unlock();
                     eraseCustomer(threadId);
                     customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
                     drawCustomer(threadId);
+                    //lock.unlock();
                     customerVectMutex.unlock();
                 }
                 else{
                     std::this_thread::sleep_for (std::chrono::milliseconds(100));
+                    //queueCondition.wait(lock);
                 }
             }
-            std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getWalkSpeed()));
-                
-            }else{
+            std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getWalkSpeed()));               
+        }else{
             customerVectMutex.lock();
+            //lock.lock();
             eraseCustomer(threadId);
             customersVect[threadId]->setPositionX(0);
+            //lock.unlock();
             customerVectMutex.unlock();
             threadsOnCheck[threadId] = false;
-            }  
+        }  
     }
 }
 
