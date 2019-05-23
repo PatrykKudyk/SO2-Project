@@ -22,7 +22,7 @@ class Window{
     std::mutex customerVectMutex;
     std::mutex drawMutex;
     std::mutex vegetableMutex;
-    std::condition_variable queueCondition;
+    std::vector<std::condition_variable *> queueCondition;
 
     public:
     Window(int height, int width);

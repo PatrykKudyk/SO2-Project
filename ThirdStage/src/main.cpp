@@ -6,9 +6,9 @@
 
 int main() {
     srand(time(NULL));
+    
     Window window = Window(30,148);
-
     window.startWindow();
-
+ 
     return 0;
 }

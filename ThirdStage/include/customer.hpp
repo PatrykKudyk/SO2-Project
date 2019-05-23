@@ -9,6 +9,7 @@ class Customer{
     int positionX;
     unsigned int shoppingTime;
     unsigned int walkSpeed;
+    short int color;
 
     public:
     Customer(int x);
@@ -17,5 +18,6 @@ class Customer{
     unsigned int getShoppingTime();
     unsigned int getWalkSpeed();
     int getPositionX();
+    short int getColor();
     void setPositionX(int value);
 };

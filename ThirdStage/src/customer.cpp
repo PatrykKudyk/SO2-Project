@@ -5,7 +5,7 @@ Customer::Customer(int x){
     shoppingTime = rand()%400 + 2400;
     walkSpeed = rand()%100 + 100;
     positionX = x;
-
+    color = rand()%4 + 1;
 }
 
 Customer::~Customer(){
@@ -26,6 +26,10 @@ unsigned int Customer::getWalkSpeed(){
 
 int Customer::getPositionX(){
     return positionX;
+}
+
+short int Customer::getColor(){
+    return color;
 }
 
 void Customer::setPositionX(int value){

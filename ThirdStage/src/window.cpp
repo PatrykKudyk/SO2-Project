@@ -10,7 +10,6 @@ Window::Window(int height, int width){
     curs_set(FALSE);    //nie wyswietla kursora
     noecho();       //nie wyswietla inputu
     nodelay(stdscr,TRUE);      //nie czeka na getchar, tylko ogarnia go w tle
-   // cbreak();       //pozwala na wyjscie z programu przy pomocyh "Ctlr+C"
     this->window = newwin(height, width, 0, 0);    //inicjalizuje okno
 
     refresh(); 
@@ -40,13 +39,15 @@ void Window::startWindow(){
     baseDraw();
     drawShelfs();
     std::vector<std::thread> threadVect;
-    //std::thread delivery([&](){deliveryThread();});
     int i = 0;
+    queueCondition.push_back(new std::condition_variable);
     do{
+        std::condition_variable condVar;
         customersVect.push_back(new Customer(144));
+        queueCondition.push_back(new std::condition_variable);
         threadsOnCheck.push_back(true);
         threadVect.push_back(std::thread([&](){useCustomerWithThreads(i);}));
-        sleep(4);
+        sleep(3);
         for(long unsigned int j = 0; j < threadsOnCheck.size(); j++){
             if(!threadsOnCheck[j])
                 if(threadVect[j].joinable())
@@ -63,7 +64,6 @@ void Window::startWindow(){
 
     }while(symbol != 'q');
 
-    //delivery.join();
     for(auto& t : threadVect){
         if(t.joinable())
             t.join();
@@ -107,11 +107,17 @@ void Window::baseDraw(){
 void Window::drawCustomer(int customerId){
     int x = customersVect[customerId]->getPositionX();
     drawMutex.lock();
+    //if(customersVect[customerId]->getColor() == 1)
+    //    attron(A_REVERSE);
     mvwprintw(window, 16, x, "O");
     mvwprintw(window, 17, x, "|");
     mvwprintw(window, 17, x - 1, "/");
     mvwprintw(window, 17, x + 1, "\\");
     mvwprintw(window, 18, x, "A");
+   // if(customersVect[customerId]->getColor() == 1)
+   //     attroff(A_REVERSE);
+    for(int i = 0; i < customersVect[customerId]->getColor(); i++)
+        mvwprintw(window, 19 + i, x, "|");
     drawMutex.unlock();
     wrefresh(window);
 }
@@ -124,6 +130,8 @@ void Window::eraseCustomer(int customerId){
     mvwprintw(window, 17, x - 1, " ");
     mvwprintw(window, 17, x + 1, " ");
     mvwprintw(window, 18, x, " ");
+    for(int i = 0; i < customersVect[customerId]->getColor(); i++)
+        mvwprintw(window, 19 + i, x, " ");
     drawMutex.unlock();
     wrefresh(window);
 }
@@ -220,47 +228,6 @@ void Window::clearVegetables(int startingPointX){
     wrefresh(window);
 }
 
-void Window::deliveryThread(){
-    do{
-        sleep(10);
-        for(int i = 3; i < 145; i++){
-            if(i == 40){
-                usleep(1000000);
-                supplyDelivery();
-                //drawShelfs();
-            }
-            eraseDelivery(i - 1);
-            drawDelivery(i);
-            usleep(100000);
-            if(symbol == 'q')
-                break;
-        }
-
-    }while(symbol != 'q');
-}
-
-void Window::drawDelivery(int x){
-    drawMutex.lock();
-    mvwprintw(window, 2, x, "-");
-    mvwprintw(window, 2, x - 1, "-");
-    mvwprintw(window, 2, x + 1, "-");
-    mvwprintw(window, 2, x - 2, "o");
-    mvwprintw(window, 2, x + 2, "o");
-    drawMutex.unlock();
-    wrefresh(window);
-}
-
-void Window::eraseDelivery(int x){
-    drawMutex.lock();
-    mvwprintw(window, 2, x, " ");
-    mvwprintw(window, 2, x - 1, " ");
-    mvwprintw(window, 2, x + 1, " ");
-    mvwprintw(window, 2, x - 2, " ");
-    mvwprintw(window, 2, x + 2, " ");
-    drawMutex.unlock();
-    wrefresh(window);
-}
-
 void Window::supplyDelivery(){
     vegetableMutex.lock();
     for(int i = 0; i < 10; i++){
@@ -278,50 +245,40 @@ void Window::useCustomerWithThreads(int threadId){
     while(threadsOnCheck[threadId]){
         
         if(symbol == 'q'){
+            for(long unsigned int i = 0; i < queueCondition.size(); i++)
+                queueCondition[i]->notify_one();
             break;
         }
-        //std::unique_lock<std::mutex> lock(customerVectMutex);
+    
+        std::unique_lock<std::mutex> lock(customerVectMutex);
         if(customersVect[threadId]->getPositionX() >= 3){
             if(customersVect[threadId]->getPositionX() == 40){
                 if(canDoShopping(threadId)){
-                    customerVectMutex.lock();
                     doShopping(threadId);
-                    //lock.unlock();
                     drawShelfs();
                     baseDraw();
-                    customerVectMutex.unlock();
+                    lock.unlock();                    
                     std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getShoppingTime()));
-                    customerVectMutex.lock();
-                    //lock.lock();
                     eraseCustomer(threadId);
                     customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
                     drawCustomer(threadId);
-                    //lock.unlock();
-                    customerVectMutex.unlock();
                 }
             }else{
                 if(canCustomerMove(threadId)){
-                    customerVectMutex.lock();
-                    //lock.unlock();
                     eraseCustomer(threadId);
                     customersVect[threadId]->setPositionX(customersVect[threadId]->getPositionX() - 1);
                     drawCustomer(threadId);
-                    //lock.unlock();
-                    customerVectMutex.unlock();
+                    queueCondition[threadId + 1]->notify_one();
+                    lock.unlock();
                 }
                 else{
-                    std::this_thread::sleep_for (std::chrono::milliseconds(100));
-                    //queueCondition.wait(lock);
+                    queueCondition[threadId]->wait(lock);
                 }
             }
-            std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getWalkSpeed()));               
+            std::this_thread::sleep_for (std::chrono::milliseconds(customersVect[threadId]->getWalkSpeed()));             
         }else{
-            customerVectMutex.lock();
-            //lock.lock();
             eraseCustomer(threadId);
             customersVect[threadId]->setPositionX(0);
-            //lock.unlock();
-            customerVectMutex.unlock();
             threadsOnCheck[threadId] = false;
         }  
     }
@@ -402,7 +359,7 @@ void Window::doShopping(int customerId){
 bool Window::canCustomerMove(int customerId){
     if(customerId > 0){
         if(!(customersVect[customerId - 1]->getPositionX() <= 3)){
-            if(customersVect[customerId]->getPositionX() >= customersVect[customerId - 1]->getPositionX() + 4){
+            if(customersVect[customerId]->getPositionX() >= customersVect[customerId - 1]->getPositionX() + 5){
                 return true;
             }else{
                 return false;
